@@ -16,9 +16,9 @@
  * limitations under the License.
  */
 
-package com.nu.art.cyborg.core.modules.preferences;
+package com.nu.art.storage;
 
-import com.nu.art.cyborg.core.modules.preferences.PreferencesModule.SharedPrefs;
+import com.nu.art.storage.PreferencesModule.SharedPrefs;
 
 public final class IntegerPreference
 	extends PreferenceKey<Integer> {

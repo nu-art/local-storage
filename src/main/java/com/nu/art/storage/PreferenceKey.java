@@ -16,14 +16,14 @@
  * limitations under the License.
  */
 
-package com.nu.art.cyborg.core.modules.preferences;
+package com.nu.art.storage;
 
 import com.nu.art.core.interfaces.Getter;
-import com.nu.art.cyborg.core.CyborgBuilder;
-import com.nu.art.cyborg.core.modules.preferences.PreferencesModule.SharedPrefs;
+import com.nu.art.storage.PreferencesModule.SharedPrefs;
+import com.nu.art.modular.core.ModuleManager;
 
-import static com.nu.art.cyborg.core.modules.preferences.PreferencesModule.DefaultStorageGroup;
-import static com.nu.art.cyborg.core.modules.preferences.PreferencesModule.EXPIRES_POSTFIX;
+import static com.nu.art.storage.PreferencesModule.DefaultStorageGroup;
+import static com.nu.art.storage.PreferencesModule.EXPIRES_POSTFIX;
 
 @SuppressWarnings("WeakerAccess")
 abstract class PreferenceKey<ItemType>
@@ -81,7 +81,7 @@ abstract class PreferenceKey<ItemType>
 	}
 
 	private PreferencesModule getPrefsModule() {
-		return CyborgBuilder.getInstance().getModule(PreferencesModule.class);
+		return ModuleManager.ModuleManager.getModule(PreferencesModule.class);
 	}
 
 	protected abstract ItemType _get(SharedPrefs preferences, String key, ItemType defaultValue);

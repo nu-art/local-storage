@@ -16,9 +16,7 @@
  * limitations under the License.
  */
 
-package com.nu.art.cyborg.core.modules.preferences;
-
-import android.support.annotation.NonNull;
+package com.nu.art.storage;
 
 import com.nu.art.core.interfaces.Getter;
 
@@ -51,7 +49,6 @@ public final class EnumPreference<EnumType extends Enum<EnumType>>
 		return get(true);
 	}
 
-	@NonNull
 	@SuppressWarnings("ConstantConditions")
 	public EnumType get(boolean printToLog) {
 		String value = key.get(printToLog);

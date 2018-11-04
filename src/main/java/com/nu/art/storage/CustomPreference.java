@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package com.nu.art.cyborg.core.modules.preferences;
+package com.nu.art.storage;
 
 import com.nu.art.core.interfaces.Getter;
 import com.nu.art.core.interfaces.Serializer;
