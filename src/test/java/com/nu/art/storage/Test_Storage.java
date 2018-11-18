@@ -5,10 +5,10 @@ import com.google.gson.GsonBuilder;
 import com.nu.art.belog.BeLogged;
 import com.nu.art.belog.DefaultLogClient;
 import com.nu.art.core.exceptions.runtime.BadImplementationException;
-import com.nu.art.core.generics.GenericParamExtractor;
+import com.nu.art.core.interfaces.Serializer;
+import com.nu.art.modular.core.ModuleManager;
 import com.nu.art.modular.core.ModuleManagerBuilder;
 import com.nu.art.modular.core.ModulesPack;
-import com.nu.art.core.interfaces.Serializer;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -19,7 +19,7 @@ import static com.nu.art.storage.Test_Storage.JsonSerializer._Serializer;
 
 public class Test_Storage {
 
-	private _ModuleBuilder moduleBuilder;
+	private ModuleManager moduleManager;
 
 	public static class JsonSerializer
 		implements Serializer<Object, String> {
@@ -39,23 +39,6 @@ public class Test_Storage {
 		}
 	}
 
-	static class _ModuleManager
-		extends com.nu.art.modular.core.ModuleManager {
-
-		protected _ModuleManager() {
-			super(GenericParamExtractor._GenericParamExtractor);
-		}
-	}
-
-	static class _ModuleBuilder
-		extends ModuleManagerBuilder {
-
-		public _ModuleBuilder() {
-			super(_ModuleManager.class);
-			setModulesPacksTypes(new Class[]{Pack.class});
-		}
-	}
-
 	static class Pack
 		extends ModulesPack {
 
@@ -70,11 +53,11 @@ public class Test_Storage {
 	}
 
 	@Before
+	@SuppressWarnings("unchecked")
 	public void setUp() {
 		BeLogged.getInstance().addClient(new DefaultLogClient());
 
-		moduleBuilder = new _ModuleBuilder();
-		moduleBuilder.buildMainManager();
+		moduleManager = new ModuleManagerBuilder().addModulePacks(Pack.class).build();
 	}
 
 	@Test
@@ -111,13 +94,13 @@ public class Test_Storage {
 		setAndValidate(pref, value);
 		sleepFor(300);
 
-		moduleBuilder.getModule(PreferencesModule.class).clearMemCache();
+		moduleManager.getModule(PreferencesModule.class).clearMemCache();
 		validate(pref, value);
 
 		deleteAndValidate(pref, defaultValue);
 		sleepFor(300);
 
-		moduleBuilder.getModule(PreferencesModule.class).clearMemCache();
+		moduleManager.getModule(PreferencesModule.class).clearMemCache();
 		validate(pref, defaultValue);
 
 		sleepFor(10000);
