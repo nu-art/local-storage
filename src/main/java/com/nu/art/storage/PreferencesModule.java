@@ -20,6 +20,7 @@ package com.nu.art.storage;
 
 import com.google.gson.Gson;
 import com.nu.art.core.exceptions.runtime.BadImplementationException;
+import com.nu.art.core.exceptions.runtime.ImplementationMissingException;
 import com.nu.art.core.file.Charsets;
 import com.nu.art.core.generics.Processor;
 import com.nu.art.core.tools.FileTools;
@@ -47,16 +48,17 @@ public final class PreferencesModule
 
 	final class SharedPrefs {
 
+		@SuppressWarnings("MismatchedQueryAndUpdateOfCollection")
 		private final HashMap<String, Object> temp = new HashMap<>();
 		private final HashMap<String, Object> data = new HashMap<>();
 		private String name;
-		private String pathToFile;
+		private File pathToFile;
 
-		private SharedPrefs(String pathToFile) {
-			this.pathToFile = pathToFile;
+		private SharedPrefs(String name) {
+			this.name = name;
 		}
 
-		final SharedPrefs setPathToFile(String pathToFile) {
+		final SharedPrefs setPathToFile(File pathToFile) {
 			this.pathToFile = pathToFile;
 			return this;
 		}
@@ -158,9 +160,11 @@ public final class PreferencesModule
 			@Override
 			public void run() {
 				try {
+					logInfo("Saving: " + name);
 					temp.clear();
 					temp.putAll(data);
-					FileTools.writeToFile(gson.toJson(data), new File(pathToFile), Charsets.UTF_8);
+					FileTools.writeToFile(gson.toJson(data), pathToFile, Charsets.UTF_8);
+					logInfo("Saved: " + name);
 				} catch (final IOException e) {
 					dispatchModuleEvent("Error saving shared preferences: " + name, PreferencesListener.class, new Processor<PreferencesListener>() {
 						@Override
@@ -180,8 +184,10 @@ public final class PreferencesModule
 		@SuppressWarnings("unchecked")
 		private void load() {
 			try {
-				String textRead = FileTools.readFullyAsString(new File(pathToFile), Charsets.UTF_8);
+				logInfo("Loading: " + name);
+				String textRead = FileTools.readFullyAsString(pathToFile, Charsets.UTF_8);
 				data.putAll(gson.fromJson(textRead, HashMap.class));
+				logInfo("Loaded: " + name);
 			} catch (final IOException e) {
 				dispatchModuleEvent("Error loading shared preferences: " + name, PreferencesListener.class, new Processor<PreferencesListener>() {
 					@Override
@@ -200,16 +206,27 @@ public final class PreferencesModule
 	private Gson gson = new Gson();
 	private HashMap<String, SharedPrefs> preferencesMap = new HashMap<>();
 	private JavaHandler savingHandler;
-	private String storageFolder;
+	private File storageFolder;
 
 	private PreferencesModule() {}
 
 	public void setStorageFolder(String storageFolder) {
-		this.storageFolder = storageFolder;
+		this.storageFolder = new File(storageFolder);
 	}
 
 	@Override
 	protected void init() {
+		if (storageFolder == null)
+			throw new ImplementationMissingException("MUST set storage root folder");
+
+		if (!storageFolder.exists()) {
+			try {
+				FileTools.mkDir(storageFolder);
+			} catch (IOException e) {
+				throw new ImplementationMissingException("Unable to create root storage folder: " + storageFolder.getAbsolutePath());
+			}
+		}
+
 		savingHandler = new JavaHandler().start("shared-preferences");
 	}
 
@@ -217,21 +234,21 @@ public final class PreferencesModule
 		this.gson = gson;
 	}
 
-	public final void createStorageGroup(String name, String pathToFile) {
-		createStorageGroupImpl(name, pathToFile);
-	}
-
-	public void clearCache() {
+	public void deleteEverything() {
 		for (String key : preferencesMap.keySet()) {
 			dropPreferences(key);
 		}
+	}
+
+	public void clearMemCache() {
+		preferencesMap.clear();
 	}
 
 	public void dropPreferences(final String storageGroup) {
 		getPreferences(storageGroup).clear();
 	}
 
-	private SharedPrefs createStorageGroupImpl(String name, String pathToFile) {
+	private SharedPrefs createStorageGroupImpl(String name, File pathToFile) {
 		SharedPrefs prefs = new SharedPrefs(name).setPathToFile(pathToFile);
 		prefs.load();
 		preferencesMap.put(name, prefs);
@@ -241,8 +258,7 @@ public final class PreferencesModule
 	final SharedPrefs getPreferences(String storageGroup) {
 		SharedPrefs sharedPreferences = preferencesMap.get(storageGroup);
 		if (sharedPreferences == null) {
-			String pathToStorageFile = storageFolder + "/" + storageGroup;
-			preferencesMap.put(storageGroup, sharedPreferences = createStorageGroupImpl(storageGroup, pathToStorageFile));
+			preferencesMap.put(storageGroup, sharedPreferences = createStorageGroupImpl(storageGroup, new File(storageFolder, storageGroup)));
 		}
 
 		return sharedPreferences;

@@ -18,16 +18,15 @@
 
 package com.nu.art.storage;
 
-import com.nu.art.core.interfaces.Getter;
-import com.nu.art.storage.PreferencesModule.SharedPrefs;
 import com.nu.art.modular.core.ModuleManager;
+import com.nu.art.storage.PreferencesModule.SharedPrefs;
 
 import static com.nu.art.storage.PreferencesModule.DefaultStorageGroup;
 import static com.nu.art.storage.PreferencesModule.EXPIRES_POSTFIX;
 
 @SuppressWarnings("WeakerAccess")
 abstract class PreferenceKey<ItemType>
-	implements Getter<ItemType> {
+	implements IPreferenceKey<ItemType> {
 
 	final String key;
 
@@ -119,6 +118,7 @@ abstract class PreferenceKey<ItemType>
 	}
 
 	public final void delete() {
+		logDebug("+----+ DELETE: " + key);
 		clearExpiration();
 		removeValue();
 	}

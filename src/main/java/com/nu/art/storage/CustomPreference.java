@@ -18,13 +18,12 @@
 
 package com.nu.art.storage;
 
-import com.nu.art.core.interfaces.Getter;
 import com.nu.art.core.interfaces.Serializer;
 
 import java.lang.reflect.Type;
 
 public final class CustomPreference<ItemType>
-	implements Getter<ItemType> {
+	implements IPreferenceKey<ItemType> {
 
 	private ItemType cache;
 
@@ -113,5 +112,10 @@ public final class CustomPreference<ItemType>
 	public void delete() {
 		key.delete();
 		cache = null;
+	}
+
+	@Override
+	public void clearExpiration() {
+		key.clearExpiration();
 	}
 }
