@@ -19,10 +19,12 @@
 package com.nu.art.storage;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.nu.art.core.exceptions.runtime.BadImplementationException;
 import com.nu.art.core.exceptions.runtime.ImplementationMissingException;
 import com.nu.art.core.file.Charsets;
 import com.nu.art.core.generics.Processor;
+import com.nu.art.core.interfaces.Serializer;
 import com.nu.art.core.tools.FileTools;
 import com.nu.art.core.utils.JavaHandler;
 import com.nu.art.core.utils.ThreadMonitor.RunnableMonitor;
@@ -30,6 +32,7 @@ import com.nu.art.modular.core.Module;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.util.HashMap;
 
 @SuppressWarnings( {
@@ -160,11 +163,11 @@ public final class PreferencesModule
 			@Override
 			public void run() {
 				try {
-					logInfo("Saving: " + name);
+					//					logInfo("Saving: " + name);
 					temp.clear();
 					temp.putAll(data);
 					FileTools.writeToFile(gson.toJson(data), pathToFile, Charsets.UTF_8);
-					logInfo("Saved: " + name);
+					//					logInfo("Saved: " + name);
 				} catch (final IOException e) {
 					dispatchModuleEvent("Error saving shared preferences: " + name, PreferencesListener.class, new Processor<PreferencesListener>() {
 						@Override
@@ -184,10 +187,10 @@ public final class PreferencesModule
 		@SuppressWarnings("unchecked")
 		private void load() {
 			try {
-				logInfo("Loading: " + name);
+				//				logInfo("Loading: " + name);
 				String textRead = FileTools.readFullyAsString(pathToFile, Charsets.UTF_8);
 				data.putAll(gson.fromJson(textRead, HashMap.class));
-				logInfo("Loaded: " + name);
+				logInfo("Loaded Storage: " + name);
 			} catch (final IOException e) {
 				dispatchModuleEvent("Error loading shared preferences: " + name, PreferencesListener.class, new Processor<PreferencesListener>() {
 					@Override
@@ -262,5 +265,23 @@ public final class PreferencesModule
 		}
 
 		return sharedPreferences;
+	}
+
+	public static class JsonSerializer
+		implements Serializer<Object, String> {
+
+		public static final JsonSerializer _Serializer = new JsonSerializer();
+
+		public static final Gson gson = new GsonBuilder().disableHtmlEscaping().setPrettyPrinting().create();
+
+		@Override
+		public String serialize(Object o) {
+			return gson.toJson(o);
+		}
+
+		@Override
+		public Object deserialize(String from, Type toType) {
+			return gson.fromJson(from, toType);
+		}
 	}
 }

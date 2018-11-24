@@ -20,22 +20,22 @@ package com.nu.art.storage;
 
 import com.nu.art.storage.PreferencesModule.SharedPrefs;
 
-public final class BooleanPreference
-	extends PreferenceKey<BooleanPreference, Boolean> {
+public final class DoublePreference
+	extends PreferenceKey<DoublePreference, Double> {
 
-	public BooleanPreference() {}
+	public DoublePreference() {}
 
-	public BooleanPreference(String key, Boolean defaultValue) {
+	public DoublePreference(String key, Double defaultValue) {
 		super(key, defaultValue);
 	}
 
 	@Override
-	protected Boolean _get(SharedPrefs preferences, String key, Boolean defaultValue) {
+	protected Double _get(SharedPrefs preferences, String key, Double defaultValue) {
 		return preferences.get(key, defaultValue);
 	}
 
 	@Override
-	protected void _set(SharedPrefs preferences, String key, Boolean value) {
+	protected void _set(SharedPrefs preferences, String key, Double value) {
 		preferences.put(key, value);
 	}
 }

@@ -18,56 +18,41 @@
 
 package com.nu.art.storage;
 
-import com.nu.art.core.interfaces.Getter;
+import com.nu.art.storage.PreferencesModule.SharedPrefs;
 
 public final class EnumPreference<EnumType extends Enum<EnumType>>
-	implements Getter<EnumType> {
+	extends PreferenceKey<EnumPreference<EnumType>, EnumType> {
 
-	private final StringPreference key;
+	private Class<EnumType> enumType;
 
-	private final Class<EnumType> enumType;
+	public EnumPreference() {}
 
 	public EnumPreference(String key, Class<EnumType> enumType, EnumType defaultValue) {
-		this(key, enumType, defaultValue, null);
-	}
-
-	public EnumPreference(String key, Class<EnumType> enumType, EnumType defaultValue, long expires) {
-		this(key, enumType, defaultValue, expires, null);
-	}
-
-	public EnumPreference(String key, Class<EnumType> enumType, EnumType defaultValue, String storageGroup) {
-		this(key, enumType, defaultValue, -1, storageGroup);
-	}
-
-	@SuppressWarnings("unchecked")
-	public EnumPreference(String key, Class<EnumType> enumType, EnumType defaultValue, long expires, String storageGroup) {
-		this.key = new StringPreference(key, defaultValue == null ? null : defaultValue.name(), expires, storageGroup);
+		super(key, defaultValue);
 		this.enumType = enumType;
 	}
 
-	public EnumType get() {
-		return get(true);
+	public EnumPreference<EnumType> setEnumType(Class<EnumType> enumType) {
+		this.enumType = enumType;
+		return this;
 	}
 
-	@SuppressWarnings("ConstantConditions")
-	public EnumType get(boolean printToLog) {
-		String value = key.get(printToLog);
+	@Override
+	protected EnumType _get(SharedPrefs preferences, String key, EnumType defaultValue) {
+		String value = preferences.get(key, defaultValue == null ? null : defaultValue.name());
 		if (value == null)
-			return null;
+			return defaultValue;
 
 		try {
 			return Enum.valueOf(enumType, value);
 		} catch (Exception e) {
-			key.delete();
+			preferences.remove(key);
 			return get();
 		}
 	}
 
-	public void set(EnumType value) {
-		key.set(value.name());
-	}
-
-	public void delete() {
-		key.delete();
+	@Override
+	protected void _set(SharedPrefs preferences, String key, EnumType value) {
+		preferences.put(key, value.name());
 	}
 }

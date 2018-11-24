@@ -21,22 +21,12 @@ package com.nu.art.storage;
 import com.nu.art.storage.PreferencesModule.SharedPrefs;
 
 public final class LongPreference
-	extends PreferenceKey<Long> {
+	extends PreferenceKey<LongPreference,Long> {
 
-	public LongPreference(String key, long defaultValue) {
+	public LongPreference() {}
+
+	public LongPreference(String key, Long defaultValue) {
 		super(key, defaultValue);
-	}
-
-	public LongPreference(String key, long defaultValue, String storageGroup) {
-		super(key, defaultValue, storageGroup);
-	}
-
-	public LongPreference(String key, long defaultValue, long expires) {
-		super(key, defaultValue, expires);
-	}
-
-	public LongPreference(String key, long defaultValue, long expires, String storageGroup) {
-		super(key, defaultValue, expires, storageGroup);
 	}
 
 	@Override

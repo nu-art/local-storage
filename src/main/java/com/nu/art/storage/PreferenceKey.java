@@ -24,42 +24,53 @@ import com.nu.art.storage.PreferencesModule.SharedPrefs;
 import static com.nu.art.storage.PreferencesModule.DefaultStorageGroup;
 import static com.nu.art.storage.PreferencesModule.EXPIRES_POSTFIX;
 
-@SuppressWarnings("WeakerAccess")
-abstract class PreferenceKey<ItemType>
-	implements IPreferenceKey<ItemType> {
+@SuppressWarnings( {
+	                   "WeakerAccess",
+	                   "unchecked",
+	                   "unused"
+                   })
+abstract class PreferenceKey<PreferenceType, ItemType> {
 
-	final String key;
-
-	private final String storageGroup;
-
-	private final ItemType defaultValue;
-
-	private final long expires;
+	PreferenceKey() {}
 
 	PreferenceKey(String key, ItemType defaultValue) {
-		this(key, defaultValue, -1);
+		setKey(key, defaultValue);
 	}
 
-	PreferenceKey(String key, ItemType defaultValue, String storageGroup) {
-		this(key, defaultValue, -1, storageGroup);
-	}
+	protected String key;
 
-	PreferenceKey(String key, ItemType defaultValue, long expires) {
-		this(key, defaultValue, expires, null);
-	}
+	protected String storageGroup = DefaultStorageGroup;
 
-	PreferenceKey(String key, ItemType defaultValue, long expires, String storageGroup) {
-		this.key = key;
-		this.storageGroup = storageGroup == null ? DefaultStorageGroup : storageGroup;
+	protected ItemType defaultValue;
+
+	protected long expires = -1;
+
+	public PreferenceType setKey(String key, ItemType defaultValue) {
 		this.defaultValue = defaultValue;
+		this.key = key;
+		return (PreferenceType) this;
+	}
+
+	public PreferenceType setStorageGroup(String storageGroup) {
+		this.storageGroup = storageGroup;
+		return (PreferenceType) this;
+	}
+
+	public PreferenceType setDefaultValue(ItemType defaultValue) {
+		this.defaultValue = defaultValue;
+		return (PreferenceType) this;
+	}
+
+	public PreferenceType setExpires(long expires) {
 		this.expires = expires;
+		return (PreferenceType) this;
 	}
 
 	public final ItemType get() {
 		return get(true);
 	}
 
-	public final ItemType get(boolean printToLog) {
+	public ItemType get(boolean printToLog) {
 		SharedPrefs preferences = getPreferences();
 		ItemType cache;
 		if (expires == -1 || System.currentTimeMillis() - preferences.get(key + EXPIRES_POSTFIX, -1L) < expires) {
@@ -117,7 +128,7 @@ abstract class PreferenceKey<ItemType>
 		getPreferences().remove(key);
 	}
 
-	public final void delete() {
+	public void delete() {
 		logDebug("+----+ DELETE: " + key);
 		clearExpiration();
 		removeValue();

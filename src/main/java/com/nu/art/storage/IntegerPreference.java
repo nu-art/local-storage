@@ -21,22 +21,12 @@ package com.nu.art.storage;
 import com.nu.art.storage.PreferencesModule.SharedPrefs;
 
 public final class IntegerPreference
-	extends PreferenceKey<Integer> {
+	extends PreferenceKey<IntegerPreference, Integer> {
 
-	public IntegerPreference(String key, int defaultValue) {
+	public IntegerPreference() {}
+
+	public IntegerPreference(String key, Integer defaultValue) {
 		super(key, defaultValue);
-	}
-
-	public IntegerPreference(String key, int defaultValue, String storageGroup) {
-		super(key, defaultValue, storageGroup);
-	}
-
-	public IntegerPreference(String key, int defaultValue, long expires) {
-		super(key, defaultValue, expires);
-	}
-
-	public IntegerPreference(String key, int defaultValue, long expires, String storageGroup) {
-		super(key, defaultValue, expires, storageGroup);
 	}
 
 	@Override

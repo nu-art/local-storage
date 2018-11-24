@@ -21,22 +21,12 @@ package com.nu.art.storage;
 import com.nu.art.storage.PreferencesModule.SharedPrefs;
 
 public final class FloatPreference
-	extends PreferenceKey<Float> {
+	extends PreferenceKey<FloatPreference, Float> {
 
-	public FloatPreference(String key, float defaultValue) {
+	public FloatPreference() {}
+
+	public FloatPreference(String key, Float defaultValue) {
 		super(key, defaultValue);
-	}
-
-	public FloatPreference(String key, float defaultValue, String storageGroup) {
-		super(key, defaultValue, storageGroup);
-	}
-
-	public FloatPreference(String key, float defaultValue, long expires) {
-		super(key, defaultValue, expires);
-	}
-
-	public FloatPreference(String key, float defaultValue, long expires, String storageGroup) {
-		super(key, defaultValue, expires, storageGroup);
 	}
 
 	@Override

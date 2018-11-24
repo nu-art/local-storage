@@ -19,103 +19,74 @@
 package com.nu.art.storage;
 
 import com.nu.art.core.interfaces.Serializer;
+import com.nu.art.storage.PreferencesModule.SharedPrefs;
 
-import java.lang.reflect.Type;
+import static com.nu.art.storage.PreferencesModule.JsonSerializer._Serializer;
 
+@SuppressWarnings("UnusedReturnValue")
 public final class CustomPreference<ItemType>
-	implements IPreferenceKey<ItemType> {
+	extends PreferenceKey<CustomPreference<ItemType>, ItemType> {
 
 	private ItemType cache;
+	private Class<ItemType> itemType;
+	private Serializer<Object, String> serializer = _Serializer;
 
-	private final StringPreference key;
+	public CustomPreference() {}
 
-	private final Type itemType;
-
-	private final ItemType defaultValue;
-
-	private final Serializer<Object, String> serializer;
-
-	public CustomPreference(Serializer<Object, String> serializer, String key, Type type) {
-		this(serializer, key, type, (ItemType) null);
+	public CustomPreference(String key, ItemType defaultValue) {
+		super(key, defaultValue);
 	}
 
-	public CustomPreference(Serializer<Object, String> serializer, String key, Type type, long expires) {
-		this(serializer, key, type, null, expires, null);
+	public CustomPreference(String key, Class<ItemType> itemType, ItemType defaultValue) {
+		super(key, defaultValue);
+		setItemType(itemType);
 	}
 
-	public CustomPreference(Serializer<Object, String> serializer, String key, Type type, String storageGroup) {
-		this(serializer, key, type, null, -1, storageGroup);
+	public CustomPreference<ItemType> setItemType(Class<ItemType> itemType) {
+		this.itemType = itemType;
+		return this;
 	}
 
-	public CustomPreference(Serializer<Object, String> serializer, String key, Type type, ItemType defaultValue) {
-		this(serializer, key, type, defaultValue, null);
-	}
-
-	public CustomPreference(Serializer<Object, String> serializer, String key, Type type, ItemType defaultValue, long expires) {
-		this(serializer, key, type, defaultValue, expires, null);
-	}
-
-	public CustomPreference(Serializer<Object, String> serializer, String key, Type type, ItemType defaultValue, String storageGroup) {
-		this(serializer, key, type, defaultValue, -1, storageGroup);
-	}
-
-	@SuppressWarnings("unchecked")
-	public CustomPreference(Serializer<Object, String> serializer, String key, Type type, ItemType defaultValue, long expires, String storageGroup) {
-		this.key = new StringPreference(key, null, expires, storageGroup);
-		this.defaultValue = defaultValue;
+	public CustomPreference<ItemType> setSerializer(Serializer<Object, String> serializer) {
 		this.serializer = serializer;
-		itemType = type;
+		return this;
 	}
 
-	public ItemType get() {
-		return get(true);
+	public CustomPreference<ItemType> setItemType(Class<ItemType> itemType, Serializer<Object, String> serializer) {
+		this.itemType = itemType;
+		this.serializer = serializer;
+		return this;
 	}
 
+	@Override
 	@SuppressWarnings("unchecked")
-	public ItemType get(boolean printToLog) {
-		if (cache != null) {
-			if (printToLog)
-				key.logDebug("+----+ CACHED: " + key.key + ": " + cache);
-			return cache;
-		}
-
-		String value = key.get(printToLog);
-		if (value == null) {
+	protected ItemType _get(SharedPrefs preferences, String key, ItemType defaultValue) {
+		String value = preferences.get(key, null);
+		if (value == null)
 			cache = defaultValue;
-			if (printToLog)
-				key.logDebug("+----+ DEFAULT: " + key.key + ": " + cache);
+
+		if (cache != null)
 			return cache;
-		}
 
 		try {
 			cache = (ItemType) serializer.deserialize(value, itemType);
 		} catch (Exception e) {
-			key.logError("Error while deserializing item type: " + itemType + ", probably changed class structure... returning null", e);
-			cache = null;
+			logError("Error while deserializing item type: " + itemType, e);
+			cache = defaultValue;
 		}
 
-		if (printToLog)
-			key.logInfo("+----+ DESERIALIZED: " + key.key + ": " + cache);
 		return cache;
 	}
 
-	public void set(ItemType value) {
-		set(value, true);
-	}
-
-	public void set(ItemType value, boolean printToLog) {
+	@Override
+	protected void _set(SharedPrefs preferences, String key, ItemType value) {
 		String valueAsString = value == null ? null : serializer.serialize(value);
 		cache = value;
-		key.set(valueAsString, printToLog);
+		preferences.put(key, valueAsString);
 	}
 
 	public void delete() {
-		key.delete();
+		super.delete();
 		cache = null;
-	}
-
-	@Override
-	public void clearExpiration() {
-		key.clearExpiration();
 	}
 }
