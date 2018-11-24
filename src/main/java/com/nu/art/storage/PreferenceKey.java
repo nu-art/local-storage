@@ -18,6 +18,8 @@
 
 package com.nu.art.storage;
 
+import com.nu.art.core.interfaces.Getter;
+import com.nu.art.core.interfaces.Setter;
 import com.nu.art.modular.core.ModuleManager;
 import com.nu.art.storage.PreferencesModule.SharedPrefs;
 
@@ -29,7 +31,8 @@ import static com.nu.art.storage.PreferencesModule.EXPIRES_POSTFIX;
 	                   "unchecked",
 	                   "unused"
                    })
-abstract class PreferenceKey<PreferenceType, ItemType> {
+abstract class PreferenceKey<PreferenceType, ItemType>
+	implements Getter<ItemType>, Setter<ItemType> {
 
 	PreferenceKey() {}
 
@@ -67,7 +70,7 @@ abstract class PreferenceKey<PreferenceType, ItemType> {
 	}
 
 	public final ItemType get() {
-		return get(true);
+		return get(false);
 	}
 
 	public ItemType get(boolean printToLog) {

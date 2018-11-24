@@ -21,6 +21,8 @@ package com.nu.art.storage;
 import com.nu.art.core.interfaces.Serializer;
 import com.nu.art.storage.PreferencesModule.SharedPrefs;
 
+import java.lang.reflect.Type;
+
 import static com.nu.art.storage.PreferencesModule.JsonSerializer._Serializer;
 
 @SuppressWarnings("UnusedReturnValue")
@@ -28,7 +30,7 @@ public final class CustomPreference<ItemType>
 	extends PreferenceKey<CustomPreference<ItemType>, ItemType> {
 
 	private ItemType cache;
-	private Class<ItemType> itemType;
+	private Type itemType;
 	private Serializer<Object, String> serializer = _Serializer;
 
 	public CustomPreference() {}
@@ -37,12 +39,12 @@ public final class CustomPreference<ItemType>
 		super(key, defaultValue);
 	}
 
-	public CustomPreference(String key, Class<ItemType> itemType, ItemType defaultValue) {
+	public CustomPreference(String key, Type itemType, ItemType defaultValue) {
 		super(key, defaultValue);
 		setItemType(itemType);
 	}
 
-	public CustomPreference<ItemType> setItemType(Class<ItemType> itemType) {
+	public CustomPreference<ItemType> setItemType(Type itemType) {
 		this.itemType = itemType;
 		return this;
 	}
