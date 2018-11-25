@@ -10,6 +10,7 @@ import com.nu.art.modular.core.ModuleManagerBuilder;
 import com.nu.art.modular.core.ModulesPack;
 
 import java.lang.reflect.Type;
+import java.util.HashMap;
 
 public class Test_Setup {
 
@@ -61,12 +62,12 @@ public class Test_Setup {
 		T defaultValue;
 		T value;
 
-		public PrefModel(PreferenceKey<?, T> pref, String key, T defaultValue, T value) {
+		public PrefModel(PreferenceKey<? extends PreferenceKey<?, T>, T> pref, String key, T defaultValue, T value) {
 			this.pref = pref;
 			this.defaultValue = defaultValue;
 			this.value = value;
 
-			pref.setKey(key, defaultValue);
+			pref.setKey(key, defaultValue).setDefaultValue(defaultValue);
 		}
 	}
 
@@ -134,6 +135,10 @@ public class Test_Setup {
 
 	public static PrefModel<Model> getCustomModel() {
 		return new PrefModel<>(new CustomPreference<Model>().setItemType(Model.class, _Serializer), "pref-custom", new Model("EMPTY"), new Model("ZEVEL"));
+	}
+
+	public static PrefModel<HashMap> getCustomModelStateful() {
+		return new PrefModel<>(new CustomPreference<HashMap>().setItemType(HashMap.class, _Serializer), "pref-custom", new HashMap(), new HashMap());
 	}
 
 	public static PrefModel<TestEnum> getEnumModel() {

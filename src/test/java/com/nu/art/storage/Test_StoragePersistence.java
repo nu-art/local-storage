@@ -5,6 +5,10 @@ import com.nu.art.storage.Test_Setup.PrefModel;
 import org.junit.BeforeClass;
 
 import static com.nu.art.storage.Test_Setup.moduleManager;
+import static com.nu.art.storage.Test_Utils.deleteAndValidate;
+import static com.nu.art.storage.Test_Utils.setAndValidate;
+import static com.nu.art.storage.Test_Utils.sleepFor;
+import static com.nu.art.storage.Test_Utils.validate;
 
 public class Test_StoragePersistence
 	extends Test_StorageBase {

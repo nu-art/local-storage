@@ -55,6 +55,9 @@ abstract class PreferenceKey<PreferenceType, ItemType>
 	}
 
 	public PreferenceType setStorageGroup(String storageGroup) {
+		if (storageGroup == null)
+			storageGroup = DefaultStorageGroup;
+
 		this.storageGroup = storageGroup;
 		return (PreferenceType) this;
 	}
@@ -110,14 +113,14 @@ abstract class PreferenceKey<PreferenceType, ItemType>
 
 		final SharedPrefs editor = getPreferences();
 		if (printToLog)
-			logDebug("+----+ SET: " + key + ": " + value);
+			logInfo("+----+ SET: " + key + ": " + value);
 
 		_set(editor, key, value);
 		if (expires != -1)
 			editor.put(key + EXPIRES_POSTFIX, System.currentTimeMillis());
 	}
 
-	private boolean areEquals(ItemType s1, ItemType s2) {
+	protected boolean areEquals(ItemType s1, ItemType s2) {
 		return s1 == null && s2 == null || s1 != null && s2 != null && s1.equals(s2);
 	}
 
@@ -132,7 +135,7 @@ abstract class PreferenceKey<PreferenceType, ItemType>
 	}
 
 	public void delete() {
-		logDebug("+----+ DELETE: " + key);
+		logInfo("+----+ DELETE: " + key);
 		clearExpiration();
 		removeValue();
 	}

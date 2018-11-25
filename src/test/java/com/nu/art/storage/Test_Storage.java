@@ -4,6 +4,9 @@ import com.nu.art.storage.Test_Setup.PrefModel;
 
 import org.junit.BeforeClass;
 
+import static com.nu.art.storage.Test_Utils.deleteAndValidate;
+import static com.nu.art.storage.Test_Utils.setAndValidate;
+
 public class Test_Storage
 	extends Test_StorageBase {
 
@@ -14,7 +17,11 @@ public class Test_Storage
 	}
 
 	protected <T> void testModel(PrefModel<T> model) {
-		setAndValidate(model.pref, model.value);
-		deleteAndValidate(model.pref, model.defaultValue);
+		for (int i = 0; i < 5; i++) {
+			setAndValidate(model.pref, model.value);
+			deleteAndValidate(model.pref, model.defaultValue);
+
+			logInfo("---------------------------------------------");
+		}
 	}
 }

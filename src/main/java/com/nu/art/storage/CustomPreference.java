@@ -64,8 +64,9 @@ public final class CustomPreference<ItemType>
 	@SuppressWarnings("unchecked")
 	protected ItemType _get(SharedPrefs preferences, String key, ItemType defaultValue) {
 		String value = preferences.get(key, null);
-		if (value == null)
+		if (value == null) {
 			cache = defaultValue;
+		}
 
 		if (cache != null)
 			return cache;
@@ -81,9 +82,14 @@ public final class CustomPreference<ItemType>
 	}
 
 	@Override
+	protected boolean areEquals(ItemType s1, ItemType s2) {
+		return false;
+	}
+
+	@Override
 	protected void _set(SharedPrefs preferences, String key, ItemType value) {
 		String valueAsString = value == null ? null : serializer.serialize(value);
-		cache = value;
+		cache = null;
 		preferences.put(key, valueAsString);
 	}
 
