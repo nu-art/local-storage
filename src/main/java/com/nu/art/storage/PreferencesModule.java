@@ -189,8 +189,11 @@ public final class PreferencesModule
 			try {
 				//				logInfo("Loading: " + name);
 				String textRead = FileTools.readFullyAsString(pathToFile, Charsets.UTF_8);
-				data.putAll(gson.fromJson(textRead, HashMap.class));
-				logInfo("Loaded Storage: " + name);
+				HashMap map = gson.fromJson(textRead, HashMap.class);
+				if (map != null) {
+					logInfo("Loaded Storage: " + name + " from: " + pathToFile);
+					data.putAll(map);
+				}
 			} catch (final IOException e) {
 				dispatchModuleEvent("Error loading shared preferences: " + name, PreferencesListener.class, new Processor<PreferencesListener>() {
 					@Override
