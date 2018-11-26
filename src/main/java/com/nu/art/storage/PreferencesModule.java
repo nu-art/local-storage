@@ -166,7 +166,7 @@ public final class PreferencesModule
 					//					logInfo("Saving: " + name);
 					temp.clear();
 					temp.putAll(data);
-					FileTools.writeToFile(gson.toJson(data), pathToFile, Charsets.UTF_8);
+					FileTools.writeToFile(gson.toJson(temp), pathToFile, Charsets.UTF_8);
 					//					logInfo("Saved: " + name);
 				} catch (final IOException e) {
 					dispatchModuleEvent("Error saving shared preferences: " + name, PreferencesListener.class, new Processor<PreferencesListener>() {
@@ -192,7 +192,9 @@ public final class PreferencesModule
 				HashMap map = gson.fromJson(textRead, HashMap.class);
 				if (map != null) {
 					logInfo("Loaded Storage: " + name + " from: " + pathToFile);
-					data.putAll(map);
+					synchronized (data) {
+						data.putAll(map);
+					}
 				}
 			} catch (final IOException e) {
 				dispatchModuleEvent("Error loading shared preferences: " + name, PreferencesListener.class, new Processor<PreferencesListener>() {
