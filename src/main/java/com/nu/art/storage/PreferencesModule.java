@@ -55,14 +55,14 @@ public final class PreferencesModule
 		private final HashMap<String, Object> temp = new HashMap<>();
 		private final HashMap<String, Object> data = new HashMap<>();
 		private String name;
-		private File pathToFile;
+		private File storageFile;
 
 		private SharedPrefs(String name) {
 			this.name = name;
 		}
 
-		final SharedPrefs setPathToFile(File pathToFile) {
-			this.pathToFile = pathToFile;
+		final SharedPrefs setStorageFile(File storageFile) {
+			this.storageFile = storageFile;
 			return this;
 		}
 
@@ -166,7 +166,12 @@ public final class PreferencesModule
 					//					logInfo("Saving: " + name);
 					temp.clear();
 					temp.putAll(data);
-					FileTools.writeToFile(gson.toJson(temp), pathToFile, Charsets.UTF_8);
+					File tempFile = new File(storageFile.getParentFile(), storageFile.getName() + ".tmp");
+
+					FileTools.writeToFile(gson.toJson(temp), tempFile, Charsets.UTF_8);
+					FileTools.delete(storageFile);
+					FileTools.renameFile(tempFile, storageFile);
+
 					//					logInfo("Saved: " + name);
 				} catch (final IOException e) {
 					dispatchModuleEvent("Error saving shared preferences: " + name, PreferencesListener.class, new Processor<PreferencesListener>() {
@@ -188,10 +193,10 @@ public final class PreferencesModule
 		private void load() {
 			try {
 				//				logInfo("Loading: " + name);
-				String textRead = FileTools.readFullyAsString(pathToFile, Charsets.UTF_8);
+				String textRead = FileTools.readFullyAsString(storageFile, Charsets.UTF_8);
 				HashMap map = gson.fromJson(textRead, HashMap.class);
 				if (map != null) {
-					logInfo("Loaded Storage: " + name + " from: " + pathToFile);
+					logInfo("Loaded Storage: " + name + " from: " + storageFile);
 					synchronized (data) {
 						data.putAll(map);
 					}
@@ -257,7 +262,7 @@ public final class PreferencesModule
 	}
 
 	private SharedPrefs createStorageGroupImpl(String name, File pathToFile) {
-		SharedPrefs prefs = new SharedPrefs(name).setPathToFile(pathToFile);
+		SharedPrefs prefs = new SharedPrefs(name).setStorageFile(pathToFile);
 		prefs.load();
 		preferencesMap.put(name, prefs);
 		return prefs;
