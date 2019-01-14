@@ -63,22 +63,18 @@ public final class CustomPreference<ItemType>
 	@Override
 	@SuppressWarnings("unchecked")
 	protected ItemType _get(SharedPrefs preferences, String key, ItemType defaultValue) {
-		String value = preferences.get(key, null);
-		if (value == null) {
-			cache = defaultValue;
-		}
-
 		if (cache != null)
 			return cache;
 
-		try {
-			cache = (ItemType) serializer.deserialize(value, itemType);
-		} catch (Exception e) {
-			logError("Error while deserializing item type: " + itemType, e);
-			cache = defaultValue;
-		}
+		String value = preferences.get(key, null);
+		if (value != null)
+			try {
+				return cache = (ItemType) serializer.deserialize(value, itemType);
+			} catch (Exception e) {
+				logError("Error while deserializing item type: " + itemType, e);
+			}
 
-		return cache;
+		return cache = (ItemType) serializer.deserialize(serializer.serialize(defaultValue), itemType);
 	}
 
 	@Override
@@ -89,7 +85,6 @@ public final class CustomPreference<ItemType>
 	@Override
 	protected void _set(SharedPrefs preferences, String key, ItemType value) {
 		String valueAsString = value == null ? null : serializer.serialize(value);
-		cache = null;
 		preferences.put(key, valueAsString);
 	}
 
