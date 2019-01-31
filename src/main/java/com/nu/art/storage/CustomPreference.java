@@ -23,6 +23,7 @@ import com.nu.art.storage.PreferencesModule.SharedPrefs;
 
 import java.lang.reflect.Type;
 
+import static com.nu.art.storage.PreferencesModule.EXPIRES_POSTFIX;
 import static com.nu.art.storage.PreferencesModule.JsonSerializer._Serializer;
 
 @SuppressWarnings("UnusedReturnValue")
@@ -80,6 +81,20 @@ public final class CustomPreference<ItemType>
 	@Override
 	protected boolean areEquals(ItemType s1, ItemType s2) {
 		return false;
+	}
+
+	public void set(final String value) {
+		set(value, false);
+	}
+
+	public void set(final String value, boolean printToLog) {
+		final SharedPrefs preferences = getPreferences();
+		if (printToLog)
+			logInfo("+----+ SET: " + key + ": " + value);
+
+		preferences.put(key, value);
+		if (expires != -1)
+			preferences.put(key + EXPIRES_POSTFIX, System.currentTimeMillis());
 	}
 
 	@Override

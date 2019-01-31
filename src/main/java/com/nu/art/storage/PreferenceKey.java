@@ -92,7 +92,7 @@ abstract class PreferenceKey<PreferenceType, ItemType>
 		}
 	}
 
-	private SharedPrefs getPreferences() {
+	SharedPrefs getPreferences() {
 		return getPrefsModule().getPreferences(storageGroup);
 	}
 
