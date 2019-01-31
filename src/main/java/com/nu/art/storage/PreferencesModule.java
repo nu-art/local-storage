@@ -216,6 +216,7 @@ public final class PreferencesModule
 
 	static final String EXPIRES_POSTFIX = "-Expires";
 
+	private final HashMap<String, File> customStorageFiles = new HashMap<>();
 	private Gson gson = new Gson();
 	private HashMap<String, SharedPrefs> preferencesMap = new HashMap<>();
 	private JavaHandler savingHandler;
@@ -261,6 +262,10 @@ public final class PreferencesModule
 		getPreferences(storageGroup).clear();
 	}
 
+	public final void defineGroup(String name, File pathToFile) {
+		customStorageFiles.put(name, pathToFile);
+	}
+
 	private SharedPrefs createStorageGroupImpl(String name, File pathToFile) {
 		SharedPrefs prefs = new SharedPrefs(name).setStorageFile(pathToFile);
 		prefs.load();
@@ -271,7 +276,12 @@ public final class PreferencesModule
 	final SharedPrefs getPreferences(String storageGroup) {
 		SharedPrefs sharedPreferences = preferencesMap.get(storageGroup);
 		if (sharedPreferences == null) {
-			preferencesMap.put(storageGroup, sharedPreferences = createStorageGroupImpl(storageGroup, new File(storageFolder, storageGroup)));
+
+			File pathToFile = customStorageFiles.get(storageGroup);
+			if (pathToFile == null)
+				pathToFile = new File(storageFolder, storageGroup);
+
+			preferencesMap.put(storageGroup, sharedPreferences = createStorageGroupImpl(storageGroup, pathToFile));
 		}
 
 		return sharedPreferences;
