@@ -18,7 +18,7 @@
 
 package com.nu.art.storage;
 
-import com.nu.art.storage.PreferencesModule.SharedPrefs;
+import com.nu.art.storage.PreferencesModule.StorageImpl;
 
 public final class BooleanPreference
 	extends PreferenceKey<BooleanPreference, Boolean> {
@@ -30,12 +30,12 @@ public final class BooleanPreference
 	}
 
 	@Override
-	protected Boolean _get(SharedPrefs preferences, String key, Boolean defaultValue) {
+	protected Boolean _get(StorageImpl preferences, String key, Boolean defaultValue) {
 		return preferences.get(key, defaultValue);
 	}
 
 	@Override
-	protected void _set(SharedPrefs preferences, String key, Boolean value) {
+	protected void _set(StorageImpl preferences, String key, Boolean value) {
 		preferences.put(key, value);
 	}
 }

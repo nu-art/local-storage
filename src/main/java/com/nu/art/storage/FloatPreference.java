@@ -18,7 +18,7 @@
 
 package com.nu.art.storage;
 
-import com.nu.art.storage.PreferencesModule.SharedPrefs;
+import com.nu.art.storage.PreferencesModule.StorageImpl;
 
 public final class FloatPreference
 	extends PreferenceKey<FloatPreference, Float> {
@@ -30,12 +30,12 @@ public final class FloatPreference
 	}
 
 	@Override
-	protected Float _get(SharedPrefs preferences, String key, Float defaultValue) {
+	protected Float _get(StorageImpl preferences, String key, Float defaultValue) {
 		return preferences.get(key, defaultValue);
 	}
 
 	@Override
-	protected void _set(SharedPrefs preferences, String key, Float value) {
+	protected void _set(StorageImpl preferences, String key, Float value) {
 		preferences.put(key, value);
 	}
 }

@@ -21,7 +21,7 @@ package com.nu.art.storage;
 import com.nu.art.core.interfaces.Getter;
 import com.nu.art.core.interfaces.Setter;
 import com.nu.art.modular.core.ModuleManager;
-import com.nu.art.storage.PreferencesModule.SharedPrefs;
+import com.nu.art.storage.PreferencesModule.StorageImpl;
 
 import static com.nu.art.storage.PreferencesModule.DefaultStorageGroup;
 import static com.nu.art.storage.PreferencesModule.EXPIRES_POSTFIX;
@@ -77,7 +77,7 @@ abstract class PreferenceKey<PreferenceType, ItemType>
 	}
 
 	public ItemType get(boolean printToLog) {
-		SharedPrefs preferences = getPreferences();
+		StorageImpl preferences = getPreferences();
 		ItemType cache;
 		if (expires == -1 || System.currentTimeMillis() - preferences.get(key + EXPIRES_POSTFIX, -1L) < expires) {
 			cache = _get(preferences, key, defaultValue);
@@ -92,15 +92,15 @@ abstract class PreferenceKey<PreferenceType, ItemType>
 		}
 	}
 
-	SharedPrefs getPreferences() {
-		return getPrefsModule().getPreferences(storageGroup);
+	StorageImpl getPreferences() {
+		return (StorageImpl) getPrefsModule().getStorage(storageGroup);
 	}
 
 	private PreferencesModule getPrefsModule() {
 		return ModuleManager.ModuleManager.getModule(PreferencesModule.class);
 	}
 
-	protected abstract ItemType _get(SharedPrefs preferences, String key, ItemType defaultValue);
+	protected abstract ItemType _get(StorageImpl preferences, String key, ItemType defaultValue);
 
 	public void set(ItemType value) {
 		set(value, true);
@@ -111,7 +111,7 @@ abstract class PreferenceKey<PreferenceType, ItemType>
 		if (areEquals(savedValue, value))
 			return;
 
-		final SharedPrefs editor = getPreferences();
+		final StorageImpl editor = getPreferences();
 		if (printToLog)
 			logInfo("+----+ SET: " + key + ": " + value);
 
@@ -121,10 +121,10 @@ abstract class PreferenceKey<PreferenceType, ItemType>
 	}
 
 	protected boolean areEquals(ItemType s1, ItemType s2) {
-		return s1 == null && s2 == null || s1 != null && s2 != null && s1.equals(s2);
+		return s1 == null && s2 == null || s1 != null && s1.equals(s2);
 	}
 
-	protected abstract void _set(SharedPrefs preferences, String key, ItemType value);
+	protected abstract void _set(StorageImpl preferences, String key, ItemType value);
 
 	public final void clearExpiration() {
 		getPreferences().put(key + EXPIRES_POSTFIX, -1L);

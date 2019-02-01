@@ -1,6 +1,8 @@
 package com.nu.art.storage;
 
+import com.nu.art.belog.Logger;
 import com.nu.art.core.exceptions.runtime.BadImplementationException;
+import com.nu.art.storage.Test_Setup.JsonSerializer;
 import com.nu.art.storage.Test_Setup.PrefModel;
 
 import org.junit.BeforeClass;
@@ -11,7 +13,8 @@ import java.util.HashMap;
 import static com.nu.art.storage.Test_Setup.moduleManager;
 import static com.nu.art.storage.Test_Utils.sleepFor;
 
-public class Test_CustomPref {
+public class Test_CustomPref
+	extends Logger {
 
 	@BeforeClass
 	@SuppressWarnings("unchecked")
@@ -21,28 +24,63 @@ public class Test_CustomPref {
 
 	@Test
 	public void test_CustomPrefsStateful() {
-		PrefModel<HashMap> model = Test_Setup.getCustomModelStateful();
-		HashMap hashMap = model.pref.get();
-		hashMap.put("pah", "zevel");
-		model.pref.set(hashMap);
+		for (int i = 0; i < 10; i++) {
+			PrefModel<HashMap> model = Test_Setup.getCustomModelStateful();
+			HashMap hashMap = model.pref.get();
+			hashMap.put("pah", "zevel");
+			model.pref.set(hashMap);
 
-		sleepFor(300);
+			sleepFor(300);
 
-		moduleManager.getModule(PreferencesModule.class).clearMemCache();
-		Object value = model.pref.get().get("pah");
-		if (value == null)
-			throw new BadImplementationException("did not save map correctly");
+			moduleManager.getModule(PreferencesModule.class).clearMemCache();
+			Object value = model.pref.get().get("pah");
+			if (value == null)
+				throw new BadImplementationException("did not save map correctly");
 
-		if (!"zevel".equals(value))
-			throw new BadImplementationException("did not save map correctly");
+			if (!"zevel".equals(value))
+				throw new BadImplementationException("Wrong value from map");
 
-		model.pref.delete();
+			model.pref.delete();
 
-		value = model.pref.get().get("pah");
-		if (value != null)
-			throw new BadImplementationException("expected empty map.. but found value");
+			value = model.pref.get().get("pah");
+			if (value != null)
+				throw new BadImplementationException("expected empty map.. but found value");
+		}
+	}
 
-		if ("zevel".equals(value))
-			throw new BadImplementationException("expected empty map.. but found value");
+	@Test
+	public void test_CustomPrefsAsString() {
+
+		for (int i = 0; i < 10; i++) {
+			PrefModel<HashMap> model = Test_Setup.getCustomModelStateful();
+			HashMap hashMap = model.pref.get(true);
+			//			hashMap.put("pah", "zevel");
+			//			model.pref.set(hashMap);
+
+			String key = "key1";
+			String storedValue = "value12";
+			hashMap = new HashMap();
+			hashMap.put(key, storedValue);
+
+			((CustomPreference) model.pref).set(JsonSerializer.gson.toJson(hashMap), true);
+
+			sleepFor(300);
+
+			moduleManager.getModule(PreferencesModule.class).clearMemCache();
+			Object value = model.pref.get(true).get(key);
+			if (value == null)
+				throw new BadImplementationException("did not save map correctly");
+
+			if (!storedValue.equals(value))
+				throw new BadImplementationException("Wrong value from map");
+
+			model.pref.delete();
+
+			value = model.pref.get(true).get(key);
+			if (value != null)
+				throw new BadImplementationException("expected empty map.. but found value");
+
+			logInfo("+---------------------------------------------+");
+		}
 	}
 }

@@ -18,7 +18,7 @@
 
 package com.nu.art.storage;
 
-import com.nu.art.storage.PreferencesModule.SharedPrefs;
+import com.nu.art.storage.PreferencesModule.StorageImpl;
 
 public final class DoublePreference
 	extends PreferenceKey<DoublePreference, Double> {
@@ -30,12 +30,12 @@ public final class DoublePreference
 	}
 
 	@Override
-	protected Double _get(SharedPrefs preferences, String key, Double defaultValue) {
+	protected Double _get(StorageImpl preferences, String key, Double defaultValue) {
 		return preferences.get(key, defaultValue);
 	}
 
 	@Override
-	protected void _set(SharedPrefs preferences, String key, Double value) {
+	protected void _set(StorageImpl preferences, String key, Double value) {
 		preferences.put(key, value);
 	}
 }

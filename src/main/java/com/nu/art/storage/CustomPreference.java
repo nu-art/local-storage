@@ -19,7 +19,7 @@
 package com.nu.art.storage;
 
 import com.nu.art.core.interfaces.Serializer;
-import com.nu.art.storage.PreferencesModule.SharedPrefs;
+import com.nu.art.storage.PreferencesModule.StorageImpl;
 
 import java.lang.reflect.Type;
 
@@ -63,19 +63,24 @@ public final class CustomPreference<ItemType>
 
 	@Override
 	@SuppressWarnings("unchecked")
-	protected ItemType _get(SharedPrefs preferences, String key, ItemType defaultValue) {
+	protected ItemType _get(StorageImpl preferences, String key, ItemType defaultValue) {
 		if (cache != null)
 			return cache;
 
 		String value = preferences.get(key, null);
 		if (value != null)
 			try {
-				return cache = (ItemType) serializer.deserialize(value, itemType);
+				return setCache((ItemType) serializer.deserialize(value, itemType));
 			} catch (Exception e) {
 				logError("Error while deserializing item type: " + itemType, e);
 			}
 
-		return cache = (ItemType) serializer.deserialize(serializer.serialize(defaultValue), itemType);
+		return setCache((ItemType) serializer.deserialize(serializer.serialize(defaultValue), itemType));
+	}
+
+	private ItemType setCache(ItemType cache) {
+		logDebug("set cache: " + cache);
+		return this.cache = cache;
 	}
 
 	@Override
@@ -88,23 +93,30 @@ public final class CustomPreference<ItemType>
 	}
 
 	public void set(final String value, boolean printToLog) {
-		final SharedPrefs preferences = getPreferences();
+		final StorageImpl preferences = getPreferences();
+		String savedValue = preferences.get(key, null);
+
+		if (savedValue != null && savedValue.equals(value))
+			return;
+
 		if (printToLog)
 			logInfo("+----+ SET: " + key + ": " + value);
 
+		setCache(null);
 		preferences.put(key, value);
 		if (expires != -1)
 			preferences.put(key + EXPIRES_POSTFIX, System.currentTimeMillis());
 	}
 
 	@Override
-	protected void _set(SharedPrefs preferences, String key, ItemType value) {
+	protected void _set(StorageImpl preferences, String key, ItemType value) {
 		String valueAsString = value == null ? null : serializer.serialize(value);
 		preferences.put(key, valueAsString);
+		cache = value;
 	}
 
 	public void delete() {
 		super.delete();
-		cache = null;
+		setCache(null);
 	}
 }

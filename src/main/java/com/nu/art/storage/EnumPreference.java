@@ -18,7 +18,7 @@
 
 package com.nu.art.storage;
 
-import com.nu.art.storage.PreferencesModule.SharedPrefs;
+import com.nu.art.storage.PreferencesModule.StorageImpl;
 
 public final class EnumPreference<EnumType extends Enum<EnumType>>
 	extends PreferenceKey<EnumPreference<EnumType>, EnumType> {
@@ -38,7 +38,7 @@ public final class EnumPreference<EnumType extends Enum<EnumType>>
 	}
 
 	@Override
-	protected EnumType _get(SharedPrefs preferences, String key, EnumType defaultValue) {
+	protected EnumType _get(StorageImpl preferences, String key, EnumType defaultValue) {
 		String value = preferences.get(key, defaultValue == null ? null : defaultValue.name());
 		if (value == null)
 			return defaultValue;
@@ -52,7 +52,7 @@ public final class EnumPreference<EnumType extends Enum<EnumType>>
 	}
 
 	@Override
-	protected void _set(SharedPrefs preferences, String key, EnumType value) {
+	protected void _set(StorageImpl preferences, String key, EnumType value) {
 		preferences.put(key, value.name());
 	}
 }

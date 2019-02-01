@@ -42,26 +42,46 @@ import java.util.HashMap;
 public final class PreferencesModule
 	extends Module {
 
-	public interface PreferencesListener {
+	public interface Storage {
+
+		/**
+		 * Will clear the preference
+		 */
+		void clear();
+
+		/**
+		 * Will clear the mem cache preference
+		 */
+		void clearMemCache();
+
+		/**
+		 * Will save the preference - synchronously
+		 */
+		void save();
+	}
+
+	public interface StorageListener {
 
 		void onSavingError(IOException e);
 
 		void onLoadingError(IOException e);
 	}
 
-	final class SharedPrefs {
+	final class StorageImpl
+		implements Storage {
 
 		@SuppressWarnings("MismatchedQueryAndUpdateOfCollection")
 		private final HashMap<String, Object> temp = new HashMap<>();
 		private final HashMap<String, Object> data = new HashMap<>();
+		private boolean loaded;
 		private String name;
 		private File storageFile;
 
-		private SharedPrefs(String name) {
+		private StorageImpl(String name) {
 			this.name = name;
 		}
 
-		final SharedPrefs setStorageFile(File storageFile) {
+		final StorageImpl setStorageFile(File storageFile) {
 			this.storageFile = storageFile;
 			return this;
 		}
@@ -142,24 +162,29 @@ public final class PreferencesModule
 			synchronized (data) {
 				data.put(key, value);
 			}
-			save();
+			_save();
 		}
 
 		final void remove(String key) {
 			synchronized (data) {
 				data.remove(key);
 			}
-			save();
+			_save();
 		}
 
-		final void clear() {
+		public final void clear() {
+			clearMemCache();
+			_save();
+		}
+
+		public final void clearMemCache() {
 			synchronized (data) {
 				data.clear();
+				loaded = false;
 			}
-			save();
 		}
 
-		Runnable save = new RunnableMonitor(new Runnable() {
+		private Runnable save = new RunnableMonitor(new Runnable() {
 			@Override
 			public void run() {
 				try {
@@ -174,9 +199,9 @@ public final class PreferencesModule
 
 					//					logInfo("Saved: " + name);
 				} catch (final IOException e) {
-					dispatchModuleEvent("Error saving shared preferences: " + name, PreferencesListener.class, new Processor<PreferencesListener>() {
+					dispatchModuleEvent("Error saving shared preferences: " + name, StorageListener.class, new Processor<StorageListener>() {
 						@Override
-						public void process(PreferencesListener listener) {
+						public void process(StorageListener listener) {
 							listener.onSavingError(e);
 						}
 					});
@@ -184,27 +209,38 @@ public final class PreferencesModule
 			}
 		});
 
-		private void save() {
+		@Override
+		public void save() {
+			save.run();
+		}
+
+		private void _save() {
 			savingHandler.remove(save);
 			savingHandler.post(100, save);
 		}
 
 		@SuppressWarnings("unchecked")
 		private void load() {
+			synchronized (data) {
+				if (loaded)
+					return;
+			}
+
 			try {
 				//				logInfo("Loading: " + name);
 				String textRead = FileTools.readFullyAsString(storageFile, Charsets.UTF_8);
 				HashMap map = gson.fromJson(textRead, HashMap.class);
 				if (map != null) {
-					logInfo("Loaded Storage: " + name + " from: " + storageFile);
+					logInfo("Loaded Storage: " + name + " from: " + storageFile);//, new WhoCalledThis("load storage"));
 					synchronized (data) {
 						data.putAll(map);
+						loaded = true;
 					}
 				}
 			} catch (final IOException e) {
-				dispatchModuleEvent("Error loading shared preferences: " + name, PreferencesListener.class, new Processor<PreferencesListener>() {
+				dispatchModuleEvent("Error loading shared preferences: " + name, StorageListener.class, new Processor<StorageListener>() {
 					@Override
-					public void process(PreferencesListener listener) {
+					public void process(StorageListener listener) {
 						listener.onLoadingError(e);
 					}
 				});
@@ -216,75 +252,73 @@ public final class PreferencesModule
 
 	static final String EXPIRES_POSTFIX = "-Expires";
 
-	private final HashMap<String, File> customStorageFiles = new HashMap<>();
 	private Gson gson = new Gson();
-	private HashMap<String, SharedPrefs> preferencesMap = new HashMap<>();
+	private final HashMap<String, StorageImpl> storageMap = new HashMap<>();
 	private JavaHandler savingHandler;
-	private File storageFolder;
+	private File storageDefaultFolder;
 
 	private PreferencesModule() {}
 
-	public void setStorageFolder(String storageFolder) {
-		this.storageFolder = new File(storageFolder);
-	}
-
 	@Override
 	protected void init() {
-		if (storageFolder == null)
+		if (storageDefaultFolder == null)
 			throw new ImplementationMissingException("MUST set storage root folder");
 
-		if (!storageFolder.exists()) {
+		if (!storageDefaultFolder.exists()) {
 			try {
-				FileTools.mkDir(storageFolder);
+				FileTools.mkDir(storageDefaultFolder);
 			} catch (IOException e) {
-				throw new ImplementationMissingException("Unable to create root storage folder: " + storageFolder.getAbsolutePath());
+				throw new ImplementationMissingException("Unable to create root storage folder: " + storageDefaultFolder.getAbsolutePath());
 			}
 		}
 
 		savingHandler = new JavaHandler().start("shared-preferences");
 	}
 
+	public final void defineGroup(String name, File pathToFile) {
+		createStorageGroupImpl(name, pathToFile);
+	}
+
+	public final void setStorageFolder(String storageFolder) {
+		this.storageDefaultFolder = new File(storageFolder);
+	}
+
 	public void setGson(Gson gson) {
 		this.gson = gson;
 	}
 
-	public void deleteEverything() {
-		for (String key : preferencesMap.keySet()) {
-			dropPreferences(key);
+	public void clear() {
+		synchronized (storageMap) {
+			for (StorageImpl storage : storageMap.values()) {
+				storage.clear();
+			}
 		}
 	}
 
 	public void clearMemCache() {
-		preferencesMap.clear();
+		synchronized (storageMap) {
+			for (StorageImpl storage : storageMap.values()) {
+				storage.clearMemCache();
+			}
+		}
 	}
 
-	public void dropPreferences(final String storageGroup) {
-		getPreferences(storageGroup).clear();
-	}
-
-	public final void defineGroup(String name, File pathToFile) {
-		customStorageFiles.put(name, pathToFile);
-	}
-
-	private SharedPrefs createStorageGroupImpl(String name, File pathToFile) {
-		SharedPrefs prefs = new SharedPrefs(name).setStorageFile(pathToFile);
+	private StorageImpl createStorageGroupImpl(String name, File pathToFile) {
+		StorageImpl prefs = new StorageImpl(name).setStorageFile(pathToFile);
 		prefs.load();
-		preferencesMap.put(name, prefs);
+		storageMap.put(name, prefs);
 		return prefs;
 	}
 
-	final SharedPrefs getPreferences(String storageGroup) {
-		SharedPrefs sharedPreferences = preferencesMap.get(storageGroup);
-		if (sharedPreferences == null) {
+	public final Storage getStorage(String storageGroup) {
+		StorageImpl preferences = storageMap.get(storageGroup);
+		if (preferences == null) {
+			File pathToFile = new File(storageDefaultFolder, storageGroup);
+			storageMap.put(storageGroup, preferences = createStorageGroupImpl(storageGroup, pathToFile));
+		} else
+			preferences.load();
 
-			File pathToFile = customStorageFiles.get(storageGroup);
-			if (pathToFile == null)
-				pathToFile = new File(storageFolder, storageGroup);
-
-			preferencesMap.put(storageGroup, sharedPreferences = createStorageGroupImpl(storageGroup, pathToFile));
-		}
-
-		return sharedPreferences;
+		return preferences;
 	}
 
 	public static class JsonSerializer
