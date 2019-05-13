@@ -17,6 +17,10 @@ public class Test_Utils {
 		validate(pref, value);
 	}
 
+	public static <T> void getAndValidate(PreferenceKey<?, T> pref, T value) {
+		validate(pref, value);
+	}
+
 	public static <T> void deleteAndValidate(PreferenceKey<?, T> pref, T defaultValue) {
 		pref.delete();
 		validate(pref, defaultValue);

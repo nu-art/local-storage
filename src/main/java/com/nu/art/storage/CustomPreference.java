@@ -38,6 +38,7 @@ public final class CustomPreference<ItemType>
 
 	public CustomPreference(String key, ItemType defaultValue) {
 		super(key, defaultValue);
+		set(defaultValue, false);
 	}
 
 	public CustomPreference(String key, Type itemType, ItemType defaultValue) {
