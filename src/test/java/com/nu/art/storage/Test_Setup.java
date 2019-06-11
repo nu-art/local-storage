@@ -3,7 +3,7 @@ package com.nu.art.storage;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.nu.art.belog.BeLogged;
-import com.nu.art.belog.DefaultLogClient;
+import com.nu.art.belog.loggers.JavaLogger;
 import com.nu.art.core.interfaces.Serializer;
 import com.nu.art.modular.core.ModuleManager;
 import com.nu.art.modular.core.ModuleManagerBuilder;
@@ -39,7 +39,7 @@ public class Test_Setup {
 		if (moduleManager != null)
 			return;
 
-		BeLogged.getInstance().addClient(new DefaultLogClient());
+		BeLogged.getInstance().addClient(new JavaLogger());
 		moduleManager = new ModuleManagerBuilder().addModulePacks(Pack.class).build();
 	}
 
