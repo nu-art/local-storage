@@ -32,32 +32,27 @@ public final class CustomPreference<ItemType>
 
 	private ItemType cache;
 	private Type itemType;
-	private Serializer<Object, String> serializer = _Serializer;
+	private Serializer<Object, String> serializer;
 
 	public CustomPreference() {}
 
-	public CustomPreference(String key, ItemType defaultValue) {
-		super(key, defaultValue);
-		set(defaultValue, false);
-	}
-
 	public CustomPreference(String key, Type itemType, ItemType defaultValue) {
+		this(key, itemType, _Serializer, defaultValue);
+	}
+
+	public CustomPreference(String key, Type itemType, Serializer<Object, String> serializer, ItemType defaultValue) {
 		super(key, defaultValue);
-		setItemType(itemType);
-	}
-
-	public CustomPreference<ItemType> setItemType(Type itemType) {
 		this.itemType = itemType;
-		return this;
-	}
-
-	public CustomPreference<ItemType> setSerializer(Serializer<Object, String> serializer) {
 		this.serializer = serializer;
-		return this;
 	}
 
 	public CustomPreference<ItemType> setItemType(Class<ItemType> itemType, Serializer<Object, String> serializer) {
 		this.itemType = itemType;
+		this.serializer = serializer;
+		return this;
+	}
+
+	public CustomPreference<ItemType> setSerializer(Serializer<Object, String> serializer) {
 		this.serializer = serializer;
 		return this;
 	}

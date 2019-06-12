@@ -39,7 +39,7 @@ public class Test_Setup {
 		if (moduleManager != null)
 			return;
 
-		BeLogged.getInstance().addClient(new JavaLogger());
+		BeLogged.getInstance().setConfig(JavaLogger.Config_FastJavaLogger);
 		moduleManager = new ModuleManagerBuilder().addModulePacks(Pack.class).build();
 	}
 
