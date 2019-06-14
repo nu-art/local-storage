@@ -4,11 +4,15 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.nu.art.belog.BeLogged;
 import com.nu.art.belog.loggers.JavaLogger;
+import com.nu.art.core.exceptions.runtime.ThisShouldNotHappenException;
 import com.nu.art.core.interfaces.Serializer;
+import com.nu.art.core.tools.FileTools;
 import com.nu.art.modular.core.ModuleManager;
 import com.nu.art.modular.core.ModuleManagerBuilder;
 import com.nu.art.modular.core.ModulesPack;
 
+import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.HashMap;
 
@@ -32,12 +36,24 @@ public class Test_Setup {
 		}
 	}
 
+	private static final File storageFolder = new File("build/test/storage");
+
 	public static ModuleManager moduleManager;
+
+	static void cleanUp() {
+		try {
+			FileTools.delete(storageFolder);
+		} catch (IOException e) {
+			throw new ThisShouldNotHappenException("Could not delete storage folder: " + storageFolder.getAbsolutePath(), e);
+		}
+	}
 
 	@SuppressWarnings("unchecked")
 	static void init() {
-		if (moduleManager != null)
+		if (moduleManager != null) {
+			cleanUp();
 			return;
+		}
 
 		BeLogged.getInstance().setConfig(JavaLogger.Config_FastJavaLogger);
 		moduleManager = new ModuleManagerBuilder().addModulePacks(Pack.class).build();
@@ -52,7 +68,7 @@ public class Test_Setup {
 
 		@Override
 		protected void init() {
-			getModule(PreferencesModule.class).setStorageFolder("build/test/storage");
+			getModule(PreferencesModule.class).setStorageFolder(storageFolder);
 		}
 	}
 

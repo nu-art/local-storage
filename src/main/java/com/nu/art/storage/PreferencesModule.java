@@ -280,7 +280,11 @@ public final class PreferencesModule
 	}
 
 	public final void setStorageFolder(String storageFolder) {
-		this.storageDefaultFolder = new File(storageFolder);
+		setStorageFolder(new File(storageFolder));
+	}
+
+	public final void setStorageFolder(File storageFolder) {
+		this.storageDefaultFolder = storageFolder;
 	}
 
 	public void setGson(Gson gson) {
