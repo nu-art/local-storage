@@ -25,6 +25,7 @@ import com.nu.art.core.exceptions.runtime.ImplementationMissingException;
 import com.nu.art.core.file.Charsets;
 import com.nu.art.core.generics.Processor;
 import com.nu.art.core.interfaces.Serializer;
+import com.nu.art.core.tools.ExceptionTools;
 import com.nu.art.core.tools.FileTools;
 import com.nu.art.core.utils.JavaHandler;
 import com.nu.art.core.utils.ThreadMonitor.RunnableMonitor;
@@ -179,6 +180,9 @@ public final class PreferencesModule
 
 		public final void clearMemCache() {
 			synchronized (data) {
+				if (DebugFlag.isEnabled())
+					logInfo("Clearing mem cache for: '" + name + "'");
+
 				data.clear();
 				loaded = false;
 			}
@@ -188,7 +192,8 @@ public final class PreferencesModule
 			@Override
 			public void run() {
 				try {
-					//					logInfo("Saving: " + name);
+					if (DebugFlag.isEnabled())
+						logInfo("Saving: " + name);
 					temp.clear();
 					temp.putAll(data);
 					File tempFile = new File(storageFile.getParentFile(), storageFile.getName() + ".tmp");
@@ -227,7 +232,9 @@ public final class PreferencesModule
 			}
 
 			try {
-				//				logInfo("Loading: " + name);
+				if (DebugFlag.isEnabled())
+					logInfo("Loading: " + name);
+
 				String textRead = FileTools.readFullyAsString(storageFile, Charsets.UTF_8);
 				HashMap map = gson.fromJson(textRead, HashMap.class);
 				if (map != null) {

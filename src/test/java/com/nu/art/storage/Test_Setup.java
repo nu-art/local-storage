@@ -10,11 +10,17 @@ import com.nu.art.core.tools.FileTools;
 import com.nu.art.modular.core.ModuleManager;
 import com.nu.art.modular.core.ModuleManagerBuilder;
 import com.nu.art.modular.core.ModulesPack;
+import com.nu.art.modular.tests.ModuleManager_TestClass;
+
+import org.junit.BeforeClass;
 
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.HashMap;
+
+import static com.nu.art.modular.tests.ModuleManager_TestClass.getModule;
+import static com.nu.art.storage.Test_Utils.sleepFor;
 
 public class Test_Setup {
 
@@ -38,25 +44,14 @@ public class Test_Setup {
 
 	private static final File storageFolder = new File("build/test/storage");
 
-	public static ModuleManager moduleManager;
-
 	static void cleanUp() {
 		try {
 			FileTools.delete(storageFolder);
+			getModule(PreferencesModule.class).clear();
+			sleepFor(300);
 		} catch (IOException e) {
 			throw new ThisShouldNotHappenException("Could not delete storage folder: " + storageFolder.getAbsolutePath(), e);
 		}
-	}
-
-	@SuppressWarnings("unchecked")
-	static void init() {
-		if (moduleManager != null) {
-			cleanUp();
-			return;
-		}
-
-		BeLogged.getInstance().setConfig(JavaLogger.Config_FastJavaLogger);
-		moduleManager = new ModuleManagerBuilder().addModulePacks(Pack.class).build();
 	}
 
 	static class Pack
@@ -68,7 +63,9 @@ public class Test_Setup {
 
 		@Override
 		protected void init() {
-			getModule(PreferencesModule.class).setStorageFolder(storageFolder);
+			PreferencesModule preferencesModule = getModule(PreferencesModule.class);
+			preferencesModule.setStorageFolder(storageFolder);
+			preferencesModule.DebugFlag.enable();
 		}
 	}
 

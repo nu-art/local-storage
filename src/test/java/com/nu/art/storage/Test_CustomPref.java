@@ -1,30 +1,24 @@
 package com.nu.art.storage;
 
-import com.nu.art.belog.Logger;
 import com.nu.art.core.exceptions.runtime.BadImplementationException;
+import com.nu.art.modular.tests.ModuleManager_TestClass;
 import com.nu.art.storage.Test_Setup.JsonSerializer;
 import com.nu.art.storage.Test_Setup.PrefModel;
 
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.util.HashMap;
 
-import static com.nu.art.storage.Test_Setup.moduleManager;
 import static com.nu.art.storage.Test_Utils.sleepFor;
 
 public class Test_CustomPref
-	extends Logger {
-
-	@BeforeClass
-	@SuppressWarnings("unchecked")
-	public static void setUp() {
-		Test_Setup.init();
-	}
+	extends Test_StorageBase {
 
 	@Test
 	public void test_CustomPrefsStateful() {
 		for (int i = 0; i < 10; i++) {
+			Test_Setup.cleanUp();
+
 			PrefModel<HashMap> model = Test_Setup.getCustomModelStateful();
 			HashMap hashMap = model.pref.get();
 			hashMap.put("pah", "zevel");
@@ -32,7 +26,7 @@ public class Test_CustomPref
 
 			sleepFor(300);
 
-			moduleManager.getModule(PreferencesModule.class).clearMemCache();
+			getModule(PreferencesModule.class).clearMemCache();
 			Object value = model.pref.get().get("pah");
 			if (value == null)
 				throw new BadImplementationException("did not save map correctly");
@@ -66,7 +60,7 @@ public class Test_CustomPref
 
 			sleepFor(300);
 
-			moduleManager.getModule(PreferencesModule.class).clearMemCache();
+			getModule(PreferencesModule.class).clearMemCache();
 			Object value = model.pref.get(true).get(key);
 			if (value == null)
 				throw new BadImplementationException("did not save map correctly");
