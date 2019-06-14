@@ -14,19 +14,15 @@ public class Test_StoragePersistence
 	protected <T> void testModel(PrefModel<T> model) {
 		Test_Setup.cleanUp();
 
-		logInfo("------------------- part 1");
 		setAndValidate(model.pref, model.value);
 		sleepFor(300);
 
-		logInfo("------------------- part 2");
 		moduleManager.getModule(PreferencesModule.class).clearMemCache();
 		validate(model.pref, model.value);
 
-		logInfo("------------------- part 3");
 		deleteAndValidate(model.pref, model.defaultValue);
 		sleepFor(300);
 
-		logInfo("------------------- part 4");
 		moduleManager.getModule(PreferencesModule.class).clearMemCache();
 		validate(model.pref, model.defaultValue);
 		logInfo("---------------------------------------------");
