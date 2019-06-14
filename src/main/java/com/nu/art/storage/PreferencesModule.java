@@ -238,7 +238,7 @@ public final class PreferencesModule
 					}
 				}
 			} catch (final IOException e) {
-				dispatchModuleEvent("Error loading shared preferences: " + name, StorageListener.class, new Processor<StorageListener>() {
+				dispatchModuleEvent("Error loading shared preferences '" + name + "' from: " + storageFile.getAbsolutePath(), StorageListener.class, new Processor<StorageListener>() {
 					@Override
 					public void process(StorageListener listener) {
 						listener.onLoadingError(e);
