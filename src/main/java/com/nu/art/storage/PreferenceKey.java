@@ -82,9 +82,6 @@ abstract class PreferenceKey<PreferenceType, ItemType>
 		ItemType cache;
 		if (expires == -1 || System.currentTimeMillis() - preferences.get(key + EXPIRES_POSTFIX, -1L) < expires) {
 			cache = _get(preferences, key, defaultValue);
-			if (key.equals("pref-string"))
-				getPrefsModule().logInfo(new WhoCalledThis("test pref-string: " + cache));
-
 			if (printToLog)
 				getPrefsModule().logInfo("+----+ LOADED: " + key + ": " + cache);
 			return cache;
