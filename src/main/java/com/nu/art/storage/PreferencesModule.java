@@ -333,7 +333,7 @@ public final class PreferencesModule
 	}
 
 	public static class JsonSerializer
-		implements Serializer<Object, String> {
+		extends Serializer<Object, String> {
 
 		public static final JsonSerializer _Serializer = new JsonSerializer();
 

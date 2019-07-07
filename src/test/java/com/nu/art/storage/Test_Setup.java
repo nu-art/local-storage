@@ -27,7 +27,7 @@ public class Test_Setup {
 	public static final JsonSerializer _Serializer = new JsonSerializer();
 
 	public static class JsonSerializer
-		implements Serializer<Object, String> {
+		extends Serializer<Object, String> {
 
 		public static final Gson gson = new GsonBuilder().disableHtmlEscaping().setPrettyPrinting().create();
 
