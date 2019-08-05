@@ -21,7 +21,7 @@ package com.nu.art.storage;
 import com.nu.art.storage.PreferencesModule.StorageImpl;
 
 public final class LongPreference
-	extends PreferenceKey<LongPreference,Long> {
+	extends PreferenceKey<LongPreference, Long> {
 
 	public LongPreference() {}
 
