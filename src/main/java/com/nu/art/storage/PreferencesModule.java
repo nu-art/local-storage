@@ -25,7 +25,6 @@ import com.nu.art.core.exceptions.runtime.ImplementationMissingException;
 import com.nu.art.core.file.Charsets;
 import com.nu.art.core.generics.Processor;
 import com.nu.art.core.interfaces.Serializer;
-import com.nu.art.core.tools.ExceptionTools;
 import com.nu.art.core.tools.FileTools;
 import com.nu.art.core.utils.JavaHandler;
 import com.nu.art.core.utils.ThreadMonitor.RunnableMonitor;
@@ -175,7 +174,15 @@ public final class PreferencesModule
 
 		public final void clear() {
 			clearMemCache();
-			_save();
+			_save(0);
+			savingHandler.post(new Runnable() {
+				@Override
+				public void run() {
+					synchronized (data) {
+						loaded = false;
+					}
+				}
+			});
 		}
 
 		public final void clearMemCache() {
@@ -184,7 +191,6 @@ public final class PreferencesModule
 					logInfo("Clearing mem cache for: '" + name + "'");
 
 				data.clear();
-				loaded = false;
 			}
 		}
 
@@ -220,8 +226,12 @@ public final class PreferencesModule
 		}
 
 		private void _save() {
+			_save(100);
+		}
+
+		private void _save(int delay) {
 			savingHandler.remove(save);
-			savingHandler.post(100, save);
+			savingHandler.post(delay, save);
 		}
 
 		@SuppressWarnings("unchecked")
