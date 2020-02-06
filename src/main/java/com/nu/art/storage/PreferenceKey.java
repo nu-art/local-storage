@@ -18,7 +18,6 @@
 
 package com.nu.art.storage;
 
-import com.nu.art.core.exceptions.runtime.WhoCalledThis;
 import com.nu.art.core.interfaces.Getter;
 import com.nu.art.core.interfaces.Setter;
 import com.nu.art.modular.core.ModuleManager;
@@ -112,13 +111,13 @@ abstract class PreferenceKey<PreferenceType, ItemType>
 		if (areEquals(savedValue, value))
 			return;
 
-		final StorageImpl editor = getPreferences();
+		final StorageImpl storage = getPreferences();
 		if (printToLog)
 			logInfo("+----+ SET: " + key + ": " + value);
 
-		_set(editor, key, value);
+		_set(storage, key, value);
 		if (expires != -1)
-			editor.put(key + EXPIRES_POSTFIX, System.currentTimeMillis());
+			storage.put(key + EXPIRES_POSTFIX, System.currentTimeMillis());
 	}
 
 	protected boolean areEquals(ItemType s1, ItemType s2) {

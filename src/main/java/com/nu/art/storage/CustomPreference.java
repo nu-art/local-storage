@@ -79,6 +79,10 @@ public final class CustomPreference<ItemType>
 		return this.cache = cache;
 	}
 
+	public void clearMemCache() {
+		setCache(null);
+	}
+
 	@Override
 	protected boolean areEquals(ItemType s1, ItemType s2) {
 		return false;
