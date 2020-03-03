@@ -216,6 +216,8 @@ public final class PreferencesModule
 							listener.onSavingError(e);
 						}
 					});
+				} finally {
+					temp.clear();
 				}
 			}
 		});
