@@ -75,6 +75,7 @@ public final class PreferencesModule
 		private final HashMap<String, Object> temp = new HashMap<>();
 		private final HashMap<String, Object> data = new HashMap<>();
 		private boolean loaded;
+		private long lastModified;
 		private String name;
 		private File storageFile;
 
@@ -244,8 +245,14 @@ public final class PreferencesModule
 		@SuppressWarnings("unchecked")
 		private void load() {
 			synchronized (data) {
-				if (loaded)
-					return;
+				if (loaded) {
+					if (storageFile.exists() && storageFile.lastModified() > lastModified) {
+						clearMemCache();
+						loaded = false;
+					} else {
+						return;
+					}
+				}
 			}
 
 			try {
@@ -260,6 +267,8 @@ public final class PreferencesModule
 					FileTools.renameFile(tempFile, storageFile);
 				}
 
+				long lastModifiedTemp = storageFile.lastModified();
+
 				if (DebugFlag.isEnabled())
 					logInfo("Loading: " + name);
 
@@ -270,6 +279,7 @@ public final class PreferencesModule
 					synchronized (data) {
 						data.putAll(map);
 						loaded = true;
+						lastModified = lastModifiedTemp;
 					}
 				}
 			} catch (final IOException e) {
