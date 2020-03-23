@@ -25,6 +25,7 @@ import com.nu.art.core.exceptions.runtime.ImplementationMissingException;
 import com.nu.art.core.file.Charsets;
 import com.nu.art.core.generics.Processor;
 import com.nu.art.core.interfaces.Serializer;
+import com.nu.art.core.tools.ExceptionTools;
 import com.nu.art.core.tools.FileTools;
 import com.nu.art.core.utils.JavaHandler;
 import com.nu.art.core.utils.ThreadMonitor.RunnableMonitor;
@@ -202,7 +203,7 @@ public final class PreferencesModule
 						logInfo("Saving: " + name);
 					temp.clear();
 					temp.putAll(data);
-					File tempFile = new File(storageFile.getParentFile(), storageFile.getName() + ".tmp");
+					File tempFile = getTempStorageFile();
 
 					FileTools.writeToFile(gson.toJson(temp), tempFile, Charsets.UTF_8);
 					FileTools.delete(storageFile);
@@ -221,6 +222,10 @@ public final class PreferencesModule
 				}
 			}
 		});
+
+		private File getTempStorageFile() {
+			return new File(storageFile.getParentFile(), storageFile.getName() + ".tmp");
+		}
 
 		@Override
 		public void save() {
@@ -244,6 +249,17 @@ public final class PreferencesModule
 			}
 
 			try {
+				if (!storageFile.exists()) {
+					File tempFile = getTempStorageFile();
+					if (!tempFile.exists()) {
+						logInfo("No storage file to load");
+						return;
+					}
+
+					logWarning("storage file did not exist, but could find the temp file... loading preference from temp file");
+					FileTools.renameFile(tempFile, storageFile);
+				}
+
 				if (DebugFlag.isEnabled())
 					logInfo("Loading: " + name);
 
@@ -257,7 +273,8 @@ public final class PreferencesModule
 					}
 				}
 			} catch (final IOException e) {
-				dispatchModuleEvent("Error loading shared preferences '" + name + "' from: " + storageFile.getAbsolutePath(), StorageListener.class, new Processor<StorageListener>() {
+				String exception = e.getMessage() + "\n" + ExceptionTools.getStackTrace(e);
+				dispatchModuleEvent("Error loading shared preferences '" + name + "' from: " + storageFile.getAbsolutePath() + "\n" + exception, StorageListener.class, new Processor<StorageListener>() {
 					@Override
 					public void process(StorageListener listener) {
 						listener.onLoadingError(e);
