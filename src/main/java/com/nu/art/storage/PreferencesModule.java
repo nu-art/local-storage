@@ -74,7 +74,6 @@ public final class PreferencesModule
 		@SuppressWarnings("MismatchedQueryAndUpdateOfCollection")
 		private final HashMap<String, Object> temp = new HashMap<>();
 		private final HashMap<String, Object> data = new HashMap<>();
-		private boolean loaded;
 		private long lastModified;
 		private String name;
 		private File storageFile;
@@ -181,7 +180,7 @@ public final class PreferencesModule
 				@Override
 				public void run() {
 					synchronized (data) {
-						loaded = false;
+						lastModified = 0;
 					}
 				}
 			});
@@ -209,6 +208,9 @@ public final class PreferencesModule
 					FileTools.writeToFile(gson.toJson(temp), tempFile, Charsets.UTF_8);
 					FileTools.delete(storageFile);
 					FileTools.renameFile(tempFile, storageFile);
+					synchronized (data) {
+						lastModified = storageFile.lastModified();
+					}
 
 					//					logInfo("Saved: " + name);
 				} catch (final IOException e) {
@@ -247,14 +249,11 @@ public final class PreferencesModule
 		private void load() {
 
 			synchronized (data) {
-				if (loaded) {
-					if (storageFile.exists() && storageFile.lastModified() > lastModified) {
-						clearMemCache();
-						loaded = false;
-					} else {
-						return;
-					}
-				}
+				if (!storageFile.exists() || storageFile.lastModified() <= lastModified)
+					return;
+
+				clearMemCache();
+				lastModified = 0;
 			}
 
 			try {
@@ -269,8 +268,6 @@ public final class PreferencesModule
 					FileTools.renameFile(tempFile, storageFile);
 				}
 
-				long lastModifiedTemp = storageFile.lastModified();
-
 				if (DebugFlag.isEnabled())
 					logInfo("Loading: " + name);
 
@@ -280,8 +277,7 @@ public final class PreferencesModule
 					logInfo("Loaded Storage: " + name + " from: " + storageFile);//, new WhoCalledThis("load storage"));
 					synchronized (data) {
 						data.putAll(map);
-						loaded = true;
-						lastModified = lastModifiedTemp;
+						lastModified = storageFile.lastModified();
 					}
 				}
 			} catch (final IOException e) {
