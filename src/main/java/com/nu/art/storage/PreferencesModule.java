@@ -212,7 +212,8 @@ public final class PreferencesModule
 
 					//					logInfo("Saved: " + name);
 				} catch (final IOException e) {
-					dispatchModuleEvent("Error saving shared preferences: " + name, StorageListener.class, new Processor<StorageListener>() {
+					String exception = e.getMessage() + "\n" + ExceptionTools.getStackTrace(e);
+					dispatchModuleEvent("Error saving shared preferences '" + name + "' to: " + storageFile.getAbsolutePath() + "\n" + exception, StorageListener.class, new Processor<StorageListener>() {
 						@Override
 						public void process(StorageListener listener) {
 							listener.onSavingError(e);
@@ -244,6 +245,7 @@ public final class PreferencesModule
 
 		@SuppressWarnings("unchecked")
 		private void load() {
+
 			synchronized (data) {
 				if (loaded) {
 					if (storageFile.exists() && storageFile.lastModified() > lastModified) {
