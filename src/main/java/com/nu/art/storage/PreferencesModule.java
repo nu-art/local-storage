@@ -352,6 +352,9 @@ public final class PreferencesModule
 	}
 
 	private StorageImpl createStorageGroupImpl(String name, File pathToFile) {
+		if (pathToFile.getParentFile() == null)
+			throw new BadImplementationException("Path to storage file MUST contain a parent folder!!");
+
 		StorageImpl prefs = new StorageImpl(name).setStorageFile(pathToFile);
 		prefs.load();
 		storageMap.put(name, prefs);
