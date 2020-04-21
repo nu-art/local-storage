@@ -32,6 +32,7 @@ import com.nu.art.core.utils.ThreadMonitor.RunnableMonitor;
 import com.nu.art.modular.core.Module;
 
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.HashMap;
@@ -271,8 +272,7 @@ public final class PreferencesModule
 				if (DebugFlag.isEnabled())
 					logInfo("Loading: " + name);
 
-				String textRead = FileTools.readFullyAsString(storageFile, Charsets.UTF_8);
-				HashMap map = gson.fromJson(textRead, HashMap.class);
+				HashMap map = gson.fromJson(new FileReader(storageFile), HashMap.class);
 				if (map != null) {
 					logInfo("Loaded Storage: " + name + " from: " + storageFile);//, new WhoCalledThis("load storage"));
 					synchronized (data) {
