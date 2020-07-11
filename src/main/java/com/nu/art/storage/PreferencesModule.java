@@ -257,6 +257,7 @@ public final class PreferencesModule
 				lastModified = 0;
 			}
 
+			FileReader storageFileReader = null;
 			try {
 				if (!storageFile.exists()) {
 					File tempFile = getTempStorageFile();
@@ -272,7 +273,8 @@ public final class PreferencesModule
 				if (DebugFlag.isEnabled())
 					logInfo("Loading: " + name);
 
-				HashMap map = gson.fromJson(new FileReader(storageFile), HashMap.class);
+				storageFileReader = new FileReader(storageFile);
+				HashMap map = gson.fromJson(storageFileReader, HashMap.class);
 				if (map != null) {
 					logInfo("Loaded Storage: " + name + " from: " + storageFile);//, new WhoCalledThis("load storage"));
 					synchronized (data) {
@@ -288,6 +290,14 @@ public final class PreferencesModule
 						listener.onLoadingError(e);
 					}
 				});
+			} finally {
+				if (storageFileReader != null) {
+					try {
+						storageFileReader.close();
+					} catch (IOException e) {
+						logWarning("Error closing storage file reader", e);
+					}
+				}
 			}
 		}
 	}
