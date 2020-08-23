@@ -202,8 +202,12 @@ public final class PreferencesModule
 				try {
 					if (DebugFlag.isEnabled())
 						logInfo("Saving: " + name);
+
 					temp.clear();
-					temp.putAll(data);
+					synchronized (data) {
+						temp.putAll(data);
+					}
+
 					File tempFile = getTempStorageFile();
 
 					FileTools.writeToFile(gson.toJson(temp), tempFile, Charsets.UTF_8);
@@ -302,7 +306,7 @@ public final class PreferencesModule
 		}
 	}
 
-	static final String DefaultStorageGroup = "DefaultStorage";
+	public static final String DefaultStorageGroup = "DefaultStorage";
 
 	static final String EXPIRES_POSTFIX = "-Expires";
 
