@@ -72,8 +72,6 @@ public final class PreferencesModule
 	final class StorageImpl
 		implements Storage {
 
-		@SuppressWarnings("MismatchedQueryAndUpdateOfCollection")
-		private final HashMap<String, Object> temp = new HashMap<>();
 		private final HashMap<String, Object> data = new HashMap<>();
 		private long lastModified;
 		private String name;
@@ -203,9 +201,9 @@ public final class PreferencesModule
 					if (DebugFlag.isEnabled())
 						logInfo("Saving: " + name);
 
-					temp.clear();
+					HashMap<String, Object> temp;
 					synchronized (data) {
-						temp.putAll(data);
+						temp = new HashMap<>(data);
 					}
 
 					File tempFile = getTempStorageFile();
@@ -226,8 +224,6 @@ public final class PreferencesModule
 							listener.onSavingError(e);
 						}
 					});
-				} finally {
-					temp.clear();
 				}
 			}
 		});
